@@ -1,0 +1,77 @@
+记录一下学习laravel基础课程遇到的问题
+
+【安装laravel 6.4后访问项目遇到问题】
+错误信息：
+Symfony\Component\Debug\Exception\FatalErrorException laravel Error
+解决办法：
+添加"symfony/translation": "4.3.8" 到composer.json文件;
+使用composer update安装扩展
+
+
+【安装laravel方法总结】
+使用composer create-project 命名就可以安装laravel项目，
+这是最简单的安装方式，在访问项目前可能会遇到几个问题
+比如：
+1.laravel需要访问数据库，需要在.env文件中配置数据库
+2.遇到像上面那种问题，解决方案就是按照一个扩展包，具体什么原因不太清除
+3.没有生成APP_KEY,需要使用命令生成appkey,具体方法后面说
+
+
+【生成App key】
+php artisan key:generate --show  
+生成App Key并显示出来，这个命令并不会替换.env文件中的APP_KEY
+不加--show选项会替换APP_KEY
+
+
+【设置路由】
+在laravel中，需要配置路由，通过路由映射到控制器方法
+
+在配置路由的时候，主要是指定路由请求方式，路由地址，控制器名和方法，具体写法如下：
+Route::get('/','StaticPagaeController@home')
+
+常用的HTTP操作有：
+get   用于页面读取
+post  用于数据提交
+patch 用于数据更新
+delete 用户数据删除
+
+
+【通过命令生成控制器】
+php artsian make:controller StaticPageStaticController
+通过这个可以生成控制器，这个控制器是在app/Http/Controllers目录下
+
+控制器默认是继承了Controllers/Controller基类控制器,可以使用比如渲染模板等方法
+
+【渲染模板】
+view($view,$data=[]) 方法可以渲染模板，第一个参数是模板文件地址,如文件在resources/views/static_pages/home.blade.php,$view则为'static_pages/home'
+
+第二个参数是与试图绑定的数据，如果有数据则通过第二参数传递
+
+【通用试图】
+对于模板来说有很多的相同的地方，把相同的地方放在通用模板中，然后其他的模板继承通用模板，可以达到代码公用的效果
+
+1.在views中创建layout/default.blade.php模板，模板中内容如下：
+<!DOCTYPE html>
+<html>
+<head>
+	<title>@yield('title','Weibo')</title>
+</head>
+<body>
+	@yield('content')
+</body>
+</html>
+
+2.创建static_pages/home.blade.php模板，内容：
+@extends('layout/default')	
+@section('title','首页')
+@section('content')
+ 这是首页
+@stop
+
+
+3.总结
+@yield这个函数声明变量，在第二个参数可以给默认值。
+@section来给@yield中的变量赋值,如果变量没有默认值使用@section() @stop标签对
+
+对于通用页面来说是可以继承通用模板的，但是对有些页面是不可以这样做的，引用的资源不一样，页面布局不一样，这样的话应该就不可以，对这块的话只有去看别人是怎么做的
+

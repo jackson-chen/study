@@ -1,0 +1,112 @@
+记录一下学习weibo项目的一些思考
+
+【这个项目对那些功能】
+1.静态页面
+首页;
+关于;
+帮助;
+
+2.用户功能
+注册
+邮件发送
+用户激活
+密码重置
+个人中心
+用户列表
+用户删除
+
+3.会话控制
+登录
+登出
+记住我
+
+4.微博数据
+微博列表
+发微博
+删除微博
+
+5.社交功能
+关注用户
+取消关注
+关注和粉丝列表
+社交统计
+关注用户动态流
+
+后期太回顾这块知识的时候，可以结合这些功能来加深印象
+
+
+
+
+【创建应用】
+1.在homestead.yaml配置虚拟域名和数据库
+2.重启数据库并加载homestead.yaml文件   
+  方案一：vagrant provision   && vagrant reload
+  方案二：vagrant halt   && vagrant up  --provision
+3.修改hosts文件  
+   192.168.10.10   weibo.test
+
+4.创建应用
+  composer create-project laravel/laravel  weibo '6.*'
+
+5.修改.env文件
+  在.env文件中有数据库、队列、缓冲、会话等等配置信息
+  这里我们主要是编辑数据库信息，host,username,password,dbname 
+  其他的配置暂时用不到，可以不管
+
+6.生成App Key
+  php artisan  key:generate
+
+7.访问项目
+通过配置的虚拟域名访问项目，看看项目可以不可以访问
+如果不能访问需要看是什么情况导致的
+
+总结： 
+创建应用是一个流程操作，不管是开发weibo也好，开发博客也好，都需要这些配置，来创建新的应用，基本上是不可以缺少的
+
+对一些配置设置过后，可靠以后都不在需要了，比如git,composer,Github SSH key配置，这些信息一旦配置，以后就很少更改了
+
+有些地方也不是很明白，比如homestead.yaml文件中的database这个选项就不是很明白，我认为在这里可以不需要设置数据库，在.env文件中就可以设置数据库配置信息。并且.env文件是不会推送到远程仓库的，远程仓库可能有自己的env信息
+
+【静态页面】
+这个章节主要是学习如何搭建静态页面
+
+1.首先我们的所有操作是在子分支下进行的，会创建新的分支，代码的修改都在新分支下完成，最后在完成代码编写后，把分支中的内容合并到master分支，用到的命令:
+git checkout master
+git checkout -b staitc-pages
+git merge static-pages
+git branch 
+git branch -d  static-pages
+
+
+2.建立完分支后，需要建立路由，主要是通过url映射到控制器和方法，是web相关的路由，路由设置是在web.php文件中进行编写
+
+Route::get('/about','StaticPagesController@about');
+
+
+3.创建路由映射到的控制器，可以使用artisan提供的命令来创建控制器,php artisan make:controller  StaticPagesController,执行后就会创建一个控制器在Http/Controllers目录下，这个控制器默认会继承基控制器Controller，它们在同一个目录下，这样就可以使用基控制器中的方法和属性了
+
+使用artisan命令必须是在项目的根目录执行，因为需要用到项目中的artisan
+文件，其他目录下就访问不到这个文件了
+
+4.创建路由绑定的方法
+生成的控制器是没有方法的，需要我们去建立方法，这些方法必须是路由中绑定的方法，不然会提示方法不存在。方法的权限是public
+
+在方法中如果要渲染页面，需要使用view()函数，第一个参数传递模板名，名字是目录加文件名的组合，比如index/index.blade.php文件，模板名就填写index/index即可，如果模板在views目录下，模板名就是index，总的来说就是填写相对于views目录的位置即可，不用填写绝对路径。
+
+view函数的第二个方法是要传递到模板中的数据，如果模板没有用到数据可以不填写，如果要传递模板数据，这个参数必须是数组或者实现Arrayable接口的对象
+
+5.创建模板
+创建方法中渲染的页面，模板名就是方法中要渲染的模板名
+
+一般我们会创建通用模板，然后让其他模板继承通用模板，以达到页面代码通用的效果，比如页面头部变化，其他页面也一起变化
+
+首先会在views下创建layouts/defalut.balde.php模板，编写模板内容。然后让其他模板继承这个通用模板default.balde.php,在渲染其他模板的时候，会把通用模板中的内容填充到其他模板中
+
+这里具体的做法不在阐述，可以结合laravel学习笔记来实现
+
+6.代码纳入到版本控制
+ 我们编写的代码并没有纳入到git版本控制，需要使用命令添加到git仓库中
+ git add -A
+ git commit -m '基础页面' 
+
+

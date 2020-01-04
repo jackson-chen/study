@@ -1,0 +1,159 @@
+
+----------------------------------安装Apache------------------------------------------
+  
+
+yum  install  -y  httpd
+
+启动命令(3种不同方法)：
+service httpd  start (不建议使用)
+/bin/systemctl   start   httpd.service 
+systemctl  start  httpd(推荐)
+
+关闭：
+systemctl stop httpd
+
+
+重启:
+systemctl restart httpd
+
+
+外部访问   设置防火墙允许http服务
+firewall-cmd  --add-service=http  --permanent
+
+重启firewall
+firewall-cmd --reload
+
+
+
+
+-------------------------------------安装MySQL----------------------------------------
+
+1.官网找到yum安装，地址https://dev.mysql.com/downloads/repo/yum/
+
+2.找到安装版本，复制版本的yum地址(https://repo.mysql.com//mysql80-community-release-el8-1.noarch.rpm)
+
+3.Linux 中下载命令  
+curl -O https://repo.mysql.com//mysql80-community-release-el7-3.noarch.rpm
+
+4.使用  rpm -ivh  mysql80-community-release-el7-3.noarch.rpm 
+
+5.找到MySQL官网rpm安装手册(https://dev.mysql.com/doc/mysql-yum-repo-quick-guide/en)，使用手册进行安装
+
+6.更新msyql yum源  rpm -Uvh   mysql80-community-release-el7-3.noarch.rpm
+
+7.安装软件包  yum  install -y  mysql-community-server
+
+8.启动mysql  systemctl start mysqld
+
+9.查看mysql密码  grep 'temporary password' /var/log/mysqld.log 
+
+10. 登录mysql   mysql -uroot -p
+
+11. 修改密码  ALTER USER 'root'@'localhost' IDENTIFIED BY 'Jackson123@';
+
+12 使用新密码登录  mysql -uroot -p  回车
+				  Jackson123@
+
+
+
+-------------------------------------安装PHP----------------------------------------
+
+1. yum install -y   php 
+
+2. 重启Apache  systemctl restart  httpd
+
+3. 下载mysqladmin  curl -O https://files.phpmyadmin.net/phpMyAdmin/5.0.0-rc1/phpMyAdmin-5.0.0-rc1-all-languages.tar.xz
+
+4. 解压压缩包  tar -xJvf  phpmyadmin.tar.xz 
+
+5. 移动phpmyadmin解压包到/var/www/html目录下
+
+
+----------------------------------Apache虚拟主机配置---------------------------------
+
+1. 进入Apache官网->project->http server -> Documentation Version 2.4 -> 虚拟主机 -> 虚拟主机样例 -> 拷贝如下内容
+
+<VirtualHost *:80>
+DocumentRoot "/var/www/html/phpmyadmin"
+ServerName myadmin.test
+
+# Other directives here
+</VirtualHost>
+
+2. 进入Apache虚拟主机配置目录 cd /etc/httpd/conf.d   
+
+
+3. 新建vhosts.conf文件,拷贝1中的配置内容到文件中
+
+4. 重启Apache
+
+5. 配置本地dns解析  
+   C:\Windows\System32\drivers\etc\hosts
+   添加  192.168.10.10 myadmin.test
+
+6. 浏览器访问 myadmin.test
+
+
+
+-------------------------------------PHP7安装----------------------------------------
+
+1.官网找PHP7安装包（https://www.php.net/distributions/php-7.2.26.tar.xz）
+
+2.下载安装包  curl -O https://www.php.net/distributions/php-7.2.26.tar.xz (下载的版本要含有configure文件)
+
+3.解压 tar -xJvf  php-7.2.26.tar.xz
+
+4.进入解压目录  cd   php-7.2.26
+
+5.编译安装必须用使用gcc，使用yum install -y  gcc 安装
+
+6.安装依赖库
+yum install -y  libxml2 libxml2-devel
+
+7.编译安装PHP需要使用Apache中的apxs；查找apxs模块find  / -name apxs；没有找到使用yum install httpd-devel 配置apache; 再使用find / -name apxs 查找apxs模块
+
+8.移除以前安装的php  yum remove php ·
+
+9.编译前配置  ./configure --prefix=/usr/local/php  --with-apxs2=/usr/bin/apxs
+
+10.编译安装
+ make && make install
+
+11. 修改httpd.conf
+	vi /etc/httpd/conf/httpd.conf 找到306行，新建一行添加如下内容：
+	AddType application/x-httpd-php .php .phtml
+	AddType application/x-httpd-php-source .phps
+
+
+12. 重启Apache
+
+
+13.安装php  mysql扩展
+
+./configure  --prefix=/usr/local/php --with-apxs2=/usr/bin/apxs --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd
+
+make && make install
+
+14. 默认访问index.php
+编辑httpd.conf 文件，在165行后面添加index.php
+重启
+
+
+
+-------------------------------------PHP7安装总结----------------------------------------
+
+1.PHP7安装后不能马上进行使用，以前的PHP版本没有完全的卸载干净，需要使用yum remove删除掉
+
+2.默认PHP7编译安装后是没有php.ini文件的，可以把php源码中的php.ini文件复制到lib目录下，把文件命名为php.ini即可
+
+3.php.ini在文件中对pdo_mysql.default_socket=/var/lib/mysql/mysql.sock
+mysqli.default_socket =/var/lib/mysql/mysql.sock 这两处进行修改
+
+4.default_socket中的值需要登录mysql,再使用status查看位置
+
+5.更改mysql8的密码方式，具体看命令：
+		pdo_mysql.default_socket=/var/lib/mysql/mysql.sock
+mysqli.default_socket =/var/lib/mysql/mysql.sock
+pdo_mysql.default_socket=/var/lib/mysql/mysql.sock
+mysqli.default_socket =/var/lib/mysql/mysql.sock
+

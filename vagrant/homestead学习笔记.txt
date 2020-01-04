@@ -1,0 +1,17 @@
+学习中遇到的homestead问题
+
+【homestead账户信息】
+默认数据库密码账户:
+homestead  sercret
+
+默认ssh账户密码:
+vagrant  vgrant
+
+修改root账户密码：
+sudo  passwd root
+su root
+
+在homestead中使用root账户，需要修改root密码，结合上面的命令操作即可
+
+
+
