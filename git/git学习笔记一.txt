@@ -44,9 +44,7 @@ git commit -m 'initial commit'
 git log
 通过该命令可以查看历史提交记录
 
-【git 撤销暂存区中文件修改】
-git checkout -f
-强制撤销暂存区中更改的文件
+
 
 【通过ssh访问Github】
 1. 需要在Homestead.yaml文件中地方keys配置我们主机中的SSH key私钥到虚拟主机，具体如何配置可以看laravel环境搭建
@@ -88,3 +86,25 @@ git merge fake-branch
 【git branch -d 删除分支】
 git branch -d fake-branch
 可以删除分支，如果分支上有内容没有合并到master分支，会提示是否强制删除
+
+【git reset --hard】
+重置暂存区与工作区，与上一次commit保持一致。不影响新增或未跟踪的文件
+
+【git reset  head  file】
+丢掉暂存区中的内容到工作区
+
+【git checkout .】
+git chekout .
+丢弃工作区所有修改或删除，不影响新增或未跟踪的文件
+
+【git checkout -f 撤销暂存区中文件修改】
+git checkout -f
+强制撤销暂存区、工作区中更改的文件
+
+【git checkout -- file】
+git checkout -- readme.md
+丢弃工作区中指定文件的修改
+
+【git clean 】
+git clean -ndf 查看删除未跟踪的文件
+git clean  -df 删除未跟踪的文件

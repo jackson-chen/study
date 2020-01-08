@@ -29,3 +29,8 @@ composer是PHP平台用来扩展包的管理工具，通过这个工具可以快
 在composer.json中require写入你要安装的版本;
 使用composer update安装扩展
 具体为什么这么做我还不清楚
+
+
+【composer require 引入扩展包】
+composer require "overtrue/laravel-lang:~3.0"
+这里举例安装一个扩展包，其中引号的部分是扩展包以及版本号，之间用冒号隔开

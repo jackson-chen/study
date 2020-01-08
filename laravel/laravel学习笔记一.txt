@@ -75,3 +75,411 @@ view($view,$data=[]) 方法可以渲染模板，第一个参数是模板文件�
 
 对于通用页面来说是可以继承通用模板的，但是对有些页面是不可以这样做的，引用的资源不一样，页面布局不一样，这样的话应该就不可以，对这块的话只有去看别人是怎么做的
 
+
+【Artisan 命令】
+Artisan 是Laravel框架的命令行接口(CLI),通过这个命令可以完成很多的操作，比如生成控制器、App Key，常用的如下：
+
+php artian  list 查看所有可以用的Artisan命令
+php artisan key:generate 生成App Key命令
+php artisan help key:generate 查看命令帮助信息
+php artsian make:controller 创建控制器
+php artisan make:model 创建模型
+php artisan route:list 查看路由列表
+php artisan tinker 进入tinker环境
+php artisan make:policy 创建授权策略
+php artisan make:seeder 生成Seeder文件
+php artisan migrate  执行迁移
+php artisan migrate:rollback 回滚迁移
+php artisan migrate:refresh 重置数据库
+php artisan db:seed  数据填充
+
+总结：
+生成相关的有 app_key,controller,model,policy，seeder
+查看：route
+数据库：迁移，回滚迁移，重置数据库，数据填充
+tinker环境
+
+【搭建laravel前端工作流】
+这里的知识点主要是来自网站教程，结合自己的理解，对于这块知识，主要明白，忘记了可以查看网站就可以了
+
+主要的知识点有:bootrap安装，npm noejs 更新， npm安装扩展，npm 启动watch-roll监听， 编写app.scss样式
+
+项目用到了bootstrap前端框架，需要使用npm来安装bootstrap,在安装boostrap前有些配置项目，具体如下
+
+首先需要使用 composer require laravel/ui --dev ， 把laravel/ui这个扩展包只在开发环境安装
+
+安装完成后使用php artisan ui bootstrap引入bootstrap, 注意这里是引入boostrap，把bootstrap引入到package.json中，默认的package.json文件是没有。不建议直接修改package.json
+
+可以查看package.jso文件可以看到有几个我们用到的NPM扩展包,bootstap,jquery,laravelMix，这里的laravelMix是Laravel框架的静态资源管理工具，后面会使用到
+
+1.接下来就是npm和node升级到最新的版本，目的是让node和npm版本一致，在使用中不会出现问题
+
+升级安装node稳定版本：
+	sudo npm cache clean --froce  强制删除npm中的缓存
+
+	sudo  npm install -g n   安装npm
+	sudo  n stable
+
+安装最新的npm版本
+	sudo npm -g npm
+
+这两个版本选择其中一个，我用的最新版本
+
+2.删除node_modules等文件
+ rm -rf node_modules
+ rm -rf  package-lock.json
+
+3.重新安装扩展到node_modules
+  sudo  npm cache clean --force
+  sudo  npm  install --force --no-bin-links
+
+如果没有报错，会生成node_modules目录，目录中会下载扩展包
+
+删除package.json中的cross-env,这个必须删除，不删除运行npm run dev 会报错
+
+可以不使用cnpm,yarn来安装扩展包，升级npm就可以安装扩展包了
+
+安装完成后我们需要更改resouce/sass/app.scss文件，只需要引入@import '~bootstrap/scss/bootstrap'，这里的'~'是node_modules目录下，在node_modules目录下就可以找到boobstrap
+
+往后我们写的css都会放在app.scss目录下，这可能不太合适，我们暂且这么做
+
+写的scss不能被项目使用，需要把scss编译成css，运行npm run dev就会把resouce目录下的文件重新编译，并把编译后生成的文件放在public目录中
+
+我们也可以使用npm run watch-poll,这个watch-poll命令会去监听resource目录下的文件改动，只要有文件内容发生变化，watch-poll命令就会触发自动编译功能，把resouce中的文件编译后存放在public对应的目录下
+
+在页面中使用public下的样式，可以用{{ mix('css/app.css') }},Laravel将会public/css/app.css文件
+
+【npm】
+NPM是Node.js的包管理和任务管理工具，通过NPM安装第三方扩展,只要你在package.json中指定了模板名和对应的版本号，就可以使用npm install来进行安装
+
+在安装前npm install命令回去检查node_modules文件夹是否存在，如果该扩展已经安装就跳过，如果没有安装就会把扩展下载到node_modules文件夹下，也可开始npm -install -f对所有扩展包安装，包括安装的也重新安装
+
+在国内需要用到taobo镜像来家属npm扩展包的安装,npm config set  registry=https://registry.npm.taobao.org
+
+之后我们就可以用npm的任务管理功能，比如npm run dev来编译scss等文件
+
+
+【Laravel Mix】
+Laravel Mix 是一个前端自动化管理工作工具，通过这个管理工具可以定义Webpack编译任务
+
+比如我们在webpack.mix.js中定义资源问的编译，压缩等任务
+
+比如在webpack.mix.js中 const mix =require('laravel-mix')， webpack.mix,js的解析引擎是Node.js,requre表示引入laravel-mix这个模块
+
+Laravel Mix中提供的API，可以实现很多的功能，比如编译ECMAScript2015,模块编译，压缩，合并js文件
+
+mix.js('resorces/js/app.js','public/js')
+mix.sass('resorces/sass/app.scss','public/css')
+第二个参数是存放编译后的文件,第一个参数是编译前的文件存放地址
+
+如果我们运行了npm run watch-poll,resouce目录下的资源文件发生变化，Webpack会自动编译这些文件，并存放到指定目录下
+
+总的来说laravel mix是一个前端管理工具，提供了简单的api,在webpack.mix.js中定义需要编译的js,scss，然后执行npm run dev,watch-poll就会监听resouce目录下文件的变化，一旦改动，将会是执行webpack.mix.js文件，从而生成前端浏览器能够识别的js，css文件
+
+
+【浏览器缓存】
+Laravel 框架提供了清除静态缓冲的方法，使用起来非常的简单，修改webpack.mix.js文件即可，在修改前说下缓存
+原理
+
+现在的浏览器会缓存静态文件，如果我们修改了静态文件需要及时更新这些文件
+
+Laravel Mix提供了一个办法，就是在每次文件修改后，哈希值会改变，简单的来说就是在静态资源后面加上一串哈希值，通过这个哈希值让浏览器重新加载静态资源
+
+稍作修改webpack.mix.js文件即可
+
+const mix =require('laravel-mix');
+
+mix.js('resources/js/app.js','public/js').sass('resource/sass/app.scss','public/css').version();
+
+
+如果使用了npm run watch-poll,只在这个指令执行时会引入webpack.mix.js文件，如果修改了webpack.mix.js文件，需要关闭watch-poll服务，然后重启这个服务就会加载webpack.mix.js文件
+
+
+【局部视图】
+之前介绍过通用模板，但是通用模板中的内容是比较多的，比如头部的导航，尾部的版权信息，如果要修改的化，只能去编辑default模板，代码也会越来越多，所以有必要把这些部分分离出去
+
+分离出去的内容我们建立了两个模板，第一个模板是_header.blade.php,第二个模板是_footer.blade.php，然后在default模板中引入这两个模板
+@include('layouts/_header'),@include('layouts/_footer')
+
+引入完成之后，这个default模板就会清爽很多，以后对header修改就在_header模板中进行，对footer修改在_footer模板下进行，比如后期新增的_error模板就是错误信息反馈页面
+
+不同的模板用不同的功能，大的模板可以拆分成小的模板，然后引入小的模板就可以了
+
+
+【命名路由】
+以往的开发中页面中的链接，我们是直接写,但是这设计到一个问题，比如我们更改了方法名，控制器，导致我们的页面也要做修改，这是一个问题，如果做到页面不修改，就需要使用路由
+
+我们知道路由两部分组成，第一部分是路由规则，第二部分是路由地址，如果我们提供一个路由名，不管我们如何变化这两部分，页面的链接都不会失效，修改路由，只要使用这个路由名的地方就会变化
+
+通过Route::post('/','StaticPagesControllers@home')->name('home')来命名路由
+
+之后可以在模板使用这些路由,{{ route('home') }},route函数的参数就是路由名，而不是路由规则，通过路由名就可以实现修改一处达到修改多处的效果
+
+【Laravel 自带的用户认证系统】
+在laravel中默认提供了一套用户登录注册功能，如果直接使用这套功能，可以对如何是实现这个过程是蒙的，所以我们要直接来学习了解这套系统，来建立自己的用户登录注册功能，再后期可以使用laravel自带的功能
+
+【Eloqument ORM】
+对数据库打交道就用用到数据模型，laravel实现一个Eloqument ORM，实现数据库的增删改查功能，Laravel提供了一个优雅的ActiveRecord领域模型模式，特点就是一个模型类对应数据中的一个表，模型类的一个实例对应表中的一行记录
+
+
+【数据库迁移】
+laravel中使用数据库迁移可以来实现管理数据表结构，迁移就有点像数据库的版本控制，让项目部署变得非常的简单，总的来说有这些好处:
+	多人并行开发
+	代码版本管理
+	数据库版本控制(回滚，重置，更新)
+	部署方便
+	兼容多种数据库
+
+【迁移文件】
+迁移文件会存放在databases/migrations目录下，迁移文件名会以时间戳+文件名，这样好处在于团队开发建立了相同文件名不会冲突
+
+迁移文件具体内容分析：
+类名CreateUsersTable，这个类名和类文件名不一样，类文件名为2019_08_19_000000_create_users_table.php，去掉时间戳剩下的就是文件名。
+类名在起的时候有规则CreatexxxsTalbe,xxx部分是你创建的表，表后面要加s,这是laravel的规范，至于表名是什么，则要在这个类中定义了
+
+类CreateUsersTable需要继承Migrate类,类有两个方式，一个是up，在运行迁移时会被调用；另一个时down方法，会在回滚迁移的时候被调用
+
+这里我们重点讲解up方法,在方法中会调用Schema类中的create静态方法，通过这个方法来创建表，具体格式如下：
+Schema::create('users',function(Blueprint $table){
+	
+});
+
+通过上面的代码可以看到create需要传递两个参数，第一个是数据库表名，第二个是一个回调函数，回调函数接收一个Blueprint类的实例，通过这个实例来完成数据库表字段的创建，具体用法如下：
+
+$table->increments('id'),这个是创建一个字段名为id的intege类型自增主键
+$table->string('name'),创建一个名为name的字段，类型为varchar长度255
+$table->string('email')->unique(),创建一个email字段，类型同上，同时会创建一个唯一索引，索引名为(users_email_unique(`email`))
+$talbe->timestamp('email_verified_at')->nullable() 创建一个timestamp类型的字段，默认值为null，记录用户认证信息
+$table->string('password', 60); 创建一个长度为60的varchar类型的字段
+$table->rememberToken(), 会创建一个varhcar(100) remember_token字段，用来存储记住我数据
+$table->timestamps(),创建两个字段,created_at,updated_at,类型为timestamp,默认为null，创建时间和修改时间
+
+
+类中另外一个方法就是down,主要是数据库回滚的时候会被执行，方法内容为 Schema::dropIfExists('users'),把表删掉，来完成数据库迁移功能
+
+【laravel 默认的数据库迁移文件】
+laravael框架默认有4个迁移文件，这个4个迁移文件如下：
+	failed_jobs：记录队列任务执行失败的表
+
+	migrations ：数据库迁移后记录迁移版本，这个表有两个字段，字段migration表示迁移文件名，字段batch记录迁移对应的批次，可以用来实现回滚迁移。第一次执行 
+
+	artisan migrate 命令时会生成migrations,往后不在生成
+
+	passwrod_resets:密码重置令牌表
+
+	users:用户表
+
+用到的命令有：
+	php artsian migrate 执行迁移
+
+	php artisan migrate:rollback 回滚迁移到最近一次迁移记录
+
+	php artisan migrate:refresh  重置数据库，相当于同时执行migrate和migrate:rollback
+
+【Eloquent 模型】
+   前面说到的了数据库迁移，这里讲解laravel中的模型
+
+   这里以默认自带的User模型为例，来简短的讲解Eloquent模型
+
+   User.php模型在App目录下，我们把这个模型移到App/Models目录下，首先修改User.php文件的命名空间App/Models,然后替换App\Users为App\Modles\Users。这里为什么这么做呢，主要目的是让我们明白MVC模式开发流程，没有别的意思
+
+   仔细发现User模型中引用到了几个类，这里简单说明一下，Authenticatable 是有关于授权相关的功能，Notifiable是消息通知相关功能
+
+   User模型中的几个属性也一并介绍一下，首先是fillable主要是用来表明那些字段可以被用户提交修改，有可能表单提交过来的数据有很多，这就是批量赋值错误，我们需要把不是用户应该提交的数据过滤掉，提高系统的安全性
+
+   第二个属性hidden,主要隐藏字段，在使用实例的toJson以及toArray方法的时候，对填写在hidden中的字段进行隐藏，这些字段是一些比较敏感涉及到安全的字段，我们不显示。在tinker环境下hidden也是有效的，每次进入tinker前会加载模型，在此期间修改了模型，需要退出tinker重新进入才能读取到修改后的模型
+
+   第三个属性table,这个是表名，默认我们是可以不指定这个属性的，如果你的模型类名和表明不一致，可以通过这个属性来指定数据库中表的名字
+
+   在使用第三个实行之前，我们说一下约定优先于配置，简单的来说就是按照约定的来做，这样可以减少很多事情，比如我们默认就采用模型类名作为数据库表名，而不需要再对table属性赋值，这样就大大的提交了开发效路，有利于团队协作。不仅这里可以使用约定优先于配置，其他地方也是如此
+
+   Eloquent模型类名对应的表名是什么样子的呢，这里简单举例一下,其他情况依次类推：
+   User.php  -> 表名：users
+   BlobPost.php  -> 表名：blod_posts
+
+   创建Eloquet模型也很简单，这里以建立goods模型举例，执行php artisan make:model  Models/Goods,就创建一个Models/Goods模型,如果模型创建错误可以直接使用命令rm -rf app/Models/Goods.php删除即可。 如果在创建模型的同时也创建数据库迁移 php artisan make:model Models/Goods -m
+
+
+【tinker使用】
+前面已经知道如何建立Eloquet模型，现在来讲解如何创建Eloquet模型实例，并将该对象存储到数据库
+
+tinker是一个REPL(read-eval-print-loop)，REPL指的是一个简单、可交互的编程环境，用户直接输入命令，就会在命令行上得到命令执行后的结果，tinker对学习laravel有很好的帮助，可以快速的学习里面的内容
+
+使用php artisan tinker命令来进入tinker环境，退出环境按ctrl+c
+
+我们在tinker上使用Elodmet模型提供的方法来创建一个用户实例， App\Models\User::create(['name'=>'jack','email'=>'123@12.com','password'=>bcrypt('123')])。 bcrypt是laravel提供
+
+
+【Eloquet模型常用方法总结】
+这里以User模型举例常用的方法
+use App\Models\User;
+User::create([]); //创建
+
+User::find(1)  // 查找主键为1的用户数据，没有返回null
+
+User::findOrFail(1) // 查找主键为1的用户数据，没有抛出异常Illuminate/Database/Eloquent/ModelNotFoundException
+
+User::all() 查找所有数据 ，一般也不这么用
+
+User::frist() 查找表中的第一行记录
+
+
+使用save方法更新
+$user=User::find(1);  $user->name='jackson';  $usesr->save();
+
+使用update方法更新
+User::where('name','jack')->update(['name'=>'jackson']);
+$user=User::find(1); $user->update(['name'=>'jackson']);
+
+【修改laravel中的timezone】
+默认laravel框架和mysql数据库的时区不是中国时区，将时区改为中国，方法如下：
+
+1.在.env 文件中新增两行
+DB_TIMEZONE=+08:00
+TIME_ZONE=PRC
+一个是 mysql 数据库的时区，一个是 php 的时区
+
+2.修改 config/app.php 如下这一行，目的是读取步骤一中.env 文件中的设置
+'timezone' => env('TIME_ZONE','UTC'),
+
+3.在 config/database.php 中的 mysql 下添加这一行
+'timezone' =>env('DB_TIMEZONE','+00:00'),
+
+4.修改完成后退出 tinker，重新进入 tinker ，修改数据，updated_at 就是中国时区了
+
+5.最后 git 中提交记录 git add -A git commit -m ' 设置时区'
+
+【RESETful 架构】
+我们现在要尊崇RESETful架构设计，把所有的数据看作资源,用URI来指定资源,对资源进行获取，创建，更新，删除操作，分别使用HTTP协议提供的GET,POST,PATCH,DELETE方法
+
+比如我们要获取用户的信息，使用/users/1 发送一个get请求，Laravel路由收到这个请求，把这个请求转发到User控制器下show方法来处理
+
+以文章举例，使用RESETful架构建立的路由：
+
+HTTP请求   URL             动作                         说明
+GET      /articles        ArticlesController@index        文章列表页面
+GET      /articles/create ArticlesController@create       文章新增页面
+POST     /articles        ArticlesController@store        文章新增
+POST    /articles/{user}/edit    ArticlesController@edit  文章编辑页面
+PATCH   /articles/{user}    ArticlesController@update     文章编辑
+GET     /articles/{user}    ArticlesController@show       文章查看
+DELETE  /articles/{user}    ArticlesController@destory    文章删除
+
+
+laravel提供了一个resource方法，可以一键生成上面的路由，Route::resource('article', 'ArticlesController'); 第一个参数只资源名称，第二个参数是资源控制器，使用这个路由相当于创建了下面这些路由：
+Route::get('/articles', 'ArticlesController@index')->name('articles.index');
+Route::get('/articles/create', 'ArticlesController@create')->name('articles.create');
+Route::get('/articles/{article}', 'ArticlesController@show')->name('articles.show');
+Route::post('/articles', 'ArticlesController@store')->name('articles.store');
+Route::get('/articles/{article}/edit', 'ArticlesController@edit')->name('articles.edit');
+Route::patch('/articles/{article}', 'ArticlesController@update')->name('articles.update');
+Route::delete('/articles/{article}', 'ArticlesController@destroy')->name('articles.destroy');
+
+非常的容易，省了一大段代码，如果我们严格按照RESETful架构风格来设计，就不用写这么多路由配置了，但是还是要学习如何建立这么路由，注意这些路由是有名称的
+
+之后我们要创建路由中指定的方法，这些方法有index,show,create,store,edit,update,destroy
+
+这里讲解一下路由片段中的{article},在讲解之前先说明show这个方法
+public function show(Ariticle $article)
+{
+    return view('users/show',compact('article'));
+}
+
+我们看到show方法声明一个Eloquet模型Article,对应的变量名为$article,而这个$user的值会自动匹配路由片段中的{article},Laravel会自动注入和URI中传入的ID对应的文章模型实例。 这个功能叫做隐性路由模型绑定，是约定优先于配置的提现，必须满足两个条件：
+
+1.必须使用Eloquet模型名称的单数小写形式作为路由片段参数，以Article举例
+Route::delete('/articles/{article}', 'ArticleController@destroy')->name('article.destroy');
+
+2.destroy方法必须要有对应的Eloquet模型类型声明的参数，并且循序一致
+public function destroy(User $user)
+{
+
+}
+
+是不是很赞，这样我们就不用再获取客户端传递的id，然后根据id找到实例，现在这些步骤只要满足以上的条件，会自动注入一个对应Eloquet模型实例
+
+如果laravel通过URI中的ID找不到数据，会自动生成HTTP 404响应，这点需要注意一下
+
+如果模板要用到Eloquet模型实例，可以用view('article/show',compact('user'))把数据和视图绑定，在视图中用到模型数据，可以这样使用{{ $article->title }}
+
+在视图中如何生成资源路由URI呢，举例，{{ route('articles.show',$user->id)}}, 就会自动生成一个/articles/12的链接，其他依次类推，route函数的第二个参数就是路由片段参数值
+
+【Gravatar头像】
+Gravatar 为 “全球通用头像”供应商，可以使用如下方法来获取自己的头像，在User模型中如下方法
+
+public function  gravatar($size=140)
+{
+	$hash = md5(strtolower(trim($this->attribute['email'])))
+	return "http://www.gravatar.com/avatar/{$hash}?s={$size}";
+}
+
+
+最后在模板中调用上面这个方法就可以获取到头像了{{ $user->gravatar(140)}}
+
+
+【全部局部视图】
+有的功能在模板上可能不止写一次，比如用户头像，错误信息提示，这些信息我们可以单独拿出来，把这一块单独做成一个局部视图，我们把这个局部视图放在shared目录下，比如shared/_user_info.blade.php
+
+在其他模板记载局部模板就是可以，@include('shared/_user_info',['user'=>$user]),include第二个参数是传递给模板的数据
+
+
+【表单提交数据】
+现在的数据使用表单提交，提交过去的数据laravel会暂时存储在闪存中，当用户填写的信息不对的时候，我们可以让用户填写的记录不丢失，使用Blade引擎模板提供的old方法，来展示输入的旧数据，即便页面跳转后重定向后依然可以访问最后一次提交到服务的数据，具体用法是这样的{{ old('name')}}
+
+Laravel为了安全性考虑，每次提交数据都必须提供一个token令牌，防止我们的网站受到CSRF（跨站请求伪造)攻击，使用起来很简单，{{ csrf_field}}放在form标签之间就可以了,编译生成的是一个input标签,具体为  <input type="hidden" name="_token" value="JocHIwY4bZEZ9u1Kd85vXhDroZBw9uRd1gxihQXh">。 如果你只想要token使用{{ csrf_token() }}
+
+还有就是伪造请求方式，浏览器不会发出delete,patch请求，需要伪造一个这样的请求,使用{{ method_filed('DELETE')}}伪造请求，编译后是这样子<input type="hidden" name="_method" value="DELETE">
+
+
+【控制器验证数据】
+对于前端提交的数据，我们总是不放心，需要我们验证一下，这里提供一种简单的方法，使用Controller基类中trait ValidatesRequests 类中提供的validate方法来验证请求数据，具体用法如下：
+public function store(Request $request)
+{
+    $this->validate($request, [
+        'name' => 'required|max:50',
+        'email' => 'required|email|unique:users|max:255',
+        'password' => 'required|confirmed|min:6'
+    ]);
+    return;
+}
+
+validate方法第一个是请求实例，第二个是参数校验规则，这里说下规则：
+required：必须
+min：最小长度
+max：最大长度
+unique: 唯一验证，会到指定的表中查找数据
+confirmed:两次输入的内容是否一致
+
+这里的request变量的值laravel会自动注入注入，request就是请求变量，可以获取到请求数据，获取所有数据$request->all(),获取email用$request->email,依次类推
+【参数验证中文错误提示】
+
+这里我们定义一个全局的局部错误视图，让其他视图引入这个错误视图,具体操作如下：
+@if(count($errors)>0)
+	@foreach($errors->all() as $error)
+		{{ $error }}
+	@endforach
+@endif
+
+这个$errors变量是从哪里来的？我们的控制器也没有给视图绑定这个参数，这是Laravel提供的解决方案，就是把验证错误信息放在闪存里面，当存在错误信息时，会自动的把这这些错误信息绑定到试图上，所以我们要判断一下$errors是否为空，为空表示没有错误信息
+
+默认的错误提示是英文的，我们要使用中文，可以使用第三方包完成这个功能，具体参考overtrue/laravel-lang扩展包，有详细的安装教程，不在赘述
+
+
+
+【页面重定向】
+有的时候会使用到重定向到另外一个页面可以使用redirect函数返回的Redirect对象，如果要使用路由跳转在后面使用route方法，具体：
+redirect()->route('users.show',[$user->id])
+
+route第二个参数是绑定数据，这里的[$user->id]可以换成[$user],$user是User模型的实例，route()方法会自动的去获取实例的主键属性值，这两种方式是等价的
+
+【session使用】
+HTTP协议是无状态的，我们可以使用会话来保存我们给客户端的数据，把这块数据保存起来，laravel在session中提供了一种闪存的东西，就是生命周期很短的session,可以使用它来保存我们的提示信息
+
+session()->flash('success',
+'欢迎') 生成一个键为success的session
+
+session()->get('success')获取键值
+
+session()->has('success')判断键值是否存在
+
+session相关的知识后面还会在做补充，这里的知识点仅仅才开始

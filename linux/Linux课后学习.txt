@@ -4,3 +4,6 @@ yum list installed | grep php    查看已经安装命令
 sudo  uname -m    查看ubunte系统多少位
 
 cat /etc/lsb-release  查看系统
+
+【查看系统时间】
+date  -R
